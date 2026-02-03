@@ -10,9 +10,9 @@ import com.example.vehiclecompanion.database.entity.VehicleEntity
 
 @Database(
     entities = [VehicleEntity::class, FavoritePlaceEntity::class],
-    version = 4,
+    version = 5,
     autoMigrations = [
-        AutoMigration(from = 3, to = 4)
+        AutoMigration(from = 4, to = 5)
     ]
 )
 

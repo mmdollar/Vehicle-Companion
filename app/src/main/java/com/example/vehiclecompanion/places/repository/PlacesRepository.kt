@@ -19,8 +19,8 @@ class PlacesRepository @Inject constructor(
 
     fun getPlaces(): Flow<List<PlaceUi>> = flow {
         val response = api.discoverPois(
-            swCorner = "-84.540499,39.079888",
-            neCorner = "-84.494260,39.113254"
+            swCorner = SW_CORNER,
+            neCorner = NE_CORNER
         )
 
         val places = response.pois.map { mapper.mapDtoToUiModel(placeDto = it) }
@@ -32,16 +32,15 @@ class PlacesRepository @Inject constructor(
     fun getFavorites(): Flow<List<FavoritePlaceEntity>> = favoritesDao.getAll()
 
     suspend fun toggleFavorite(place: PlaceUi, isFavorite: Boolean) {
-        val entity = FavoritePlaceEntity(
-            id = place.id,
-            name = place.name,
-            imageUrl = place.imageUrl
-        )
-
         if (isFavorite) {
-            favoritesDao.insert(place = entity)
+            favoritesDao.insert(place = mapper.mapUiToEntity(placeUi = place))
         } else {
-            favoritesDao.delete(place = entity)
+            favoritesDao.deleteById(id = place.id)
         }
+    }
+
+    private companion object {
+        const val SW_CORNER = "-84.540499,39.079888"
+        const val NE_CORNER = "-84.494260,39.113254"
     }
 }
