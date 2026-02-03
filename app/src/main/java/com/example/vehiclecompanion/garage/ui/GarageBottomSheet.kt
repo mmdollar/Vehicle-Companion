@@ -28,7 +28,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -48,6 +51,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -57,6 +61,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.vehiclecompanion.garage.data.FuelType
 import com.example.vehiclecompanion.garage.data.GarageIntent
 import com.example.vehiclecompanion.garage.data.VehicleUi
 import java.io.File
@@ -64,7 +69,7 @@ import java.io.FileOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GarageBottomSheet(isOpen: Boolean, onSubmitIntent: (GarageIntent) -> Unit) {
+fun GarageBottomSheet(isOpen: Boolean, vehicleForEdit: VehicleUi?, onSubmitIntent: (GarageIntent) -> Unit) {
     AddEditBottomSheet(
         isVisible = isOpen,
         onDismissRequest = { onSubmitIntent(GarageIntent.HideSheet) }
@@ -75,7 +80,7 @@ fun GarageBottomSheet(isOpen: Boolean, onSubmitIntent: (GarageIntent) -> Unit) {
                 .padding(all = 24.dp),
             verticalArrangement = spacedBy(space = 8.dp),
         ) {
-            VehicleForm(onSubmitIntent = onSubmitIntent)
+            VehicleForm(vehicleForEdit = vehicleForEdit, onSubmitIntent = onSubmitIntent)
         }
     }
 }
@@ -93,7 +98,7 @@ private fun AddEditBottomSheet(
     contentColor: Color = contentColorFor(backgroundColor = containerColor),
     tonalElevation: Dp = 0.dp,
     scrimColor: Color = BottomSheetDefaults.ScrimColor,
-    dragHandle: @Composable (() -> Unit)? = { BottomSheetDefaults.DragHandle() },
+    dragHandle: @Composable (() -> Unit)? = null,
     contentWindowInsets: @Composable () -> WindowInsets = { BottomSheetDefaults.windowInsets },
     properties: ModalBottomSheetProperties = ModalBottomSheetDefaults.properties,
     content: @Composable ColumnScope.() -> Unit,
@@ -125,18 +130,22 @@ private fun AddEditBottomSheet(
         contentWindowInsets = contentWindowInsets,
         properties = properties,
         content = content,
+        sheetGesturesEnabled = false,
     )
 }
 
 @Composable
-private fun VehicleForm(onSubmitIntent: (GarageIntent) -> Unit) {
+private fun VehicleForm(vehicleForEdit: VehicleUi?, onSubmitIntent: (GarageIntent) -> Unit) {
     val context = LocalContext.current
-    var name by remember { mutableStateOf(value = "") }
-    var make by remember { mutableStateOf(value = "") }
-    var model by remember { mutableStateOf(value = "") }
-    var year by remember { mutableStateOf(value = "") }
-    var vin by remember { mutableStateOf(value = "") }
-    var selectedPhotoUri by remember { mutableStateOf<String?>(value = null) }
+    var name by remember { mutableStateOf(value = vehicleForEdit?.name.orEmpty()) }
+    var make by remember { mutableStateOf(value = vehicleForEdit?.make.orEmpty()) }
+    var model by remember { mutableStateOf(value = vehicleForEdit?.model.orEmpty()) }
+    var year by remember { mutableStateOf(value = vehicleForEdit?.year?.toString().orEmpty()) }
+    var vin by remember { mutableStateOf(value = vehicleForEdit?.vin.orEmpty()) }
+    var selectedPhotoUri by remember { mutableStateOf<String?>(value = vehicleForEdit?.photoUri) }
+    var fuelType by remember {
+        mutableStateOf(value = vehicleForEdit?.fuelType ?: FuelType.UNKNOWN)
+    }
     val stagedVehicles = remember { mutableStateListOf<VehicleUi>() }
 
     val isFormValid = name.isNotBlank() && make.isNotBlank() &&
@@ -164,7 +173,7 @@ private fun VehicleForm(onSubmitIntent: (GarageIntent) -> Unit) {
         verticalArrangement = spacedBy(space = 16.dp)
     ) {
         Text(
-            text = "Add New Vehicle",
+            text = if (vehicleForEdit == null) "Add New Vehicle" else "Edit Vehicle",
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(bottom = 8.dp)
         )
@@ -238,6 +247,11 @@ private fun VehicleForm(onSubmitIntent: (GarageIntent) -> Unit) {
             )
         }
 
+        FuelTypeDropdown(
+            selectedType = fuelType,
+            onTypeSelected = { fuelType = it }
+        )
+
         Spacer(modifier = Modifier.height(height = 24.dp))
 
 
@@ -258,17 +272,20 @@ private fun VehicleForm(onSubmitIntent: (GarageIntent) -> Unit) {
                         model = model,
                         year = year.toInt(),
                         vin = vin,
-                        photo = selectedPhotoUri.orEmpty()
+                        photoUri = selectedPhotoUri.orEmpty(),
+                        fuelType = fuelType
                     )
                 )
 
                 clearFields()
             },
             modifier = Modifier
+                .alpha(alpha = if (vehicleForEdit == null) 1f else 0f)
                 .fillMaxWidth()
                 .height(height = 56.dp),
             shape = RoundedCornerShape(size = 12.dp),
-            enabled = isFormValid
+            enabled = isFormValid && vehicleForEdit == null,
+
         ) {
             Text(text = "Add another vehicle")
         }
@@ -282,7 +299,8 @@ private fun VehicleForm(onSubmitIntent: (GarageIntent) -> Unit) {
                         model = model,
                         year = year.toInt(),
                         vin = vin,
-                        photo = selectedPhotoUri.orEmpty()
+                        photoUri = selectedPhotoUri.orEmpty(),
+                        fuelType = fuelType
                     )
                 )
 
@@ -305,6 +323,47 @@ private fun VehicleForm(onSubmitIntent: (GarageIntent) -> Unit) {
             shape = RoundedCornerShape(size = 12.dp)
         ) {
             Text(text = "Cancel")
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FuelTypeDropdown(
+    selectedType: FuelType,
+    onTypeSelected: (FuelType) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val displayText = selectedType.name.lowercase().replaceFirstChar { it.uppercase() }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        OutlinedTextField(
+            value = displayText,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(text = "Fuel Type") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+            modifier = Modifier.menuAnchor().fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            FuelType.entries.forEach { type ->
+                DropdownMenuItem(
+                    text = { Text(text = type.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                    onClick = {
+                        onTypeSelected(type)
+                        expanded = false
+                    }
+                )
+            }
         }
     }
 }

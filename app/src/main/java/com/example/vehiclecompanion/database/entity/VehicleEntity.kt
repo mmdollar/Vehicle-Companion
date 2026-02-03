@@ -7,7 +7,7 @@ import com.example.vehiclecompanion.garage.data.FuelType
 @Entity(tableName = "vehicles")
 data class VehicleEntity(
     @PrimaryKey(autoGenerate = true)
-    var id: Int? = null,
+    var id: Long? = null,
     var name: String,
     var make: String,
     var model: String,

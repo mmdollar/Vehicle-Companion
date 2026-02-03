@@ -24,6 +24,7 @@ class GarageViewModel @Inject constructor(
     private val repository: VehicleRepository
 ) : ViewModel() {
     private val isSheetOpen = MutableStateFlow(value = false)
+    private val vehicleForEdit = MutableStateFlow<VehicleUi?>(value = null)
     private val _uiState = MutableStateFlow<UiState<GarageUi>>(value = UiState.Loading)
     val uiState: StateFlow<UiState<GarageUi>> = _uiState.asStateFlow()
 
@@ -36,14 +37,22 @@ class GarageViewModel @Inject constructor(
 
     fun onSubmitIntent(intent: GarageIntent): Unit =
         when (intent) {
-            is GarageIntent.DeleteVehicle -> {}
+            is GarageIntent.DeleteVehicle -> deleteVehicle(id = intent.id)
             is GarageIntent.SaveVehicles -> {
-                isSheetOpen.value = false
                 saveVehicles(vehicle = intent.vehicles)
+                vehicleForEdit.value = null
+                isSheetOpen.value = false
             }
 
-            is GarageIntent.HideSheet -> isSheetOpen.value = false
+            is GarageIntent.HideSheet -> {
+                vehicleForEdit.value = null
+                isSheetOpen.value = false
+            }
             is GarageIntent.ShowSheet -> isSheetOpen.value = true
+            is GarageIntent.EditVehicle -> {
+                vehicleForEdit.value = intent.vehicle
+                isSheetOpen.value = true
+            }
         }
 
     private fun saveVehicles(vehicle: List<VehicleUi>) {
@@ -52,14 +61,24 @@ class GarageViewModel @Inject constructor(
         }
     }
 
+    private fun deleteVehicle(id: Long) {
+        viewModelScope.launch(context = Dispatchers.IO) {
+            repository.deleteVehicle(vehicleId = id)
+        }
+    }
+
     private fun getAllVehicles() {
         viewModelScope.launch(context = Dispatchers.IO) {
             repository.getAllVehicles()
-                .combine(flow = isSheetOpen) { vehicles, isSheetOpen ->
+                .combine(flow = isSheetOpen) { vehicles, isOpen ->
+                    vehicles to isOpen
+                }
+                .combine(flow = vehicleForEdit) { (vehicles, isOpen), editVehicle ->
                     UiState.Success(
                         data = GarageUi(
                             vehicles = vehicles,
-                            isSheetOpen = isSheetOpen
+                            isSheetOpen = isOpen,
+                            vehicleForEdit = editVehicle
                         )
                     )
                 }
@@ -70,7 +89,6 @@ class GarageViewModel @Inject constructor(
                 .collect { newState ->
                     _uiState.value = newState
                 }
-
         }
     }
 }

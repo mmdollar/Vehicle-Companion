@@ -1,6 +1,7 @@
 package com.example.vehiclecompanion.garage.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,7 +15,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,6 +45,7 @@ import com.example.vehiclecompanion.garage.data.FuelType
 import com.example.vehiclecompanion.garage.data.GarageIntent
 import com.example.vehiclecompanion.garage.data.GarageUi
 import com.example.vehiclecompanion.garage.data.VehicleUi
+import kotlin.text.lowercase
 
 @Composable
 fun GarageScreen(viewModel: GarageViewModel) {
@@ -99,11 +103,12 @@ private fun GarageContent(uiState: UiState<GarageUi>, onSubmitIntent: (GarageInt
                 if (uiState.data.vehicles.isEmpty()) {
                     AddVehicleContent(onSubmitIntent = onSubmitIntent)
                 } else {
-                    VehicleList(vehicles = uiState.data.vehicles)
+                    VehicleList(vehicles = uiState.data.vehicles, onSubmitIntent = onSubmitIntent)
                 }
 
                 GarageBottomSheet(
                     isOpen = uiState.data.isSheetOpen,
+                    vehicleForEdit = uiState.data.vehicleForEdit,
                     onSubmitIntent = onSubmitIntent
                 )
             }
@@ -119,26 +124,28 @@ private fun LoadingView() {
 }
 
 @Composable
-private fun VehicleList(vehicles: List<VehicleUi>) {
+private fun VehicleList(vehicles: List<VehicleUi>, onSubmitIntent: (GarageIntent) -> Unit) {
     LazyColumn {
         items(count = vehicles.count()) { vehicle ->
-            VehicleCard(vehicles[vehicle])
+            VehicleCard(vehicle = vehicles[vehicle], onSubmitIntent = onSubmitIntent)
         }
     }
 }
 
 @Composable
 private fun AddVehicleContent(onSubmitIntent: (GarageIntent) -> Unit) {
-    Text(
-        text = "You currently do not have any vehicles in your garage. Please add new vehicles.",
-        textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.bodyLarge
-    )
-
-    Box(
+    Column(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
+        Text(
+            modifier = Modifier.padding(bottom = 16.dp),
+            text = "You currently do not have any vehicles in your garage. Please add new vehicles.",
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyLarge
+        )
+
         Button(onClick = { onSubmitIntent(GarageIntent.ShowSheet) }) { Text(text = "Add Vehicle") }
     }
 }
@@ -151,7 +158,8 @@ private fun ErrorView() {
 @Composable
 private fun VehicleCard(
     vehicle: VehicleUi,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onSubmitIntent: (GarageIntent) -> Unit
 ) {
     Card(
         modifier = modifier
@@ -166,7 +174,7 @@ private fun VehicleCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             VehicleImage(
-                photoUri = vehicle.photo,
+                photoUri = vehicle.photoUri,
                 modifier = Modifier
                     .size(size = 80.dp)
                     .clip(shape = RoundedCornerShape(size = 8.dp))
@@ -178,17 +186,50 @@ private fun VehicleCard(
                 Text(
                     text = vehicle.name,
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
                 )
                 Text(
-                    text = "${vehicle.year} ${vehicle.make} ${vehicle.model}",
+                    text = "Model: ${vehicle.model}",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                )
+                Text(
+                    text = "Year: ${vehicle.year} Make: ${vehicle.make}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
                 )
                 Text(
                     text = "VIN: ${vehicle.vin}",
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1,
+                )
+                Text(
+                    text = "Fuel: ${
+                        vehicle.fuelType.toString().lowercase().replaceFirstChar { it.uppercase() }
+                    }",
                     style = MaterialTheme.typography.labelSmall
                 )
+            }
+
+            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.End) {
+                IconButton(onClick = { onSubmitIntent(GarageIntent.EditVehicle(vehicle)) }) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit Vehicle",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                IconButton(onClick = { onSubmitIntent(GarageIntent.DeleteVehicle(vehicle.id)) }) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete Vehicle",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }
@@ -224,7 +265,7 @@ fun GaragePreview_Success() {
             year = 2022,
             vin = "1234535678",
             fuelType = FuelType.GASOLINE,
-            photo = "test"
+            photoUri = "test"
         ),
         VehicleUi(
             name = "My Truck 2",
@@ -233,7 +274,7 @@ fun GaragePreview_Success() {
             year = 2025,
             vin = "1234355489",
             fuelType = FuelType.ELECTRIC,
-            photo = "test"
+            photoUri = "test"
         )
     )
 

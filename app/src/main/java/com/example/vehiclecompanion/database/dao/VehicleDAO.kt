@@ -15,4 +15,7 @@ interface VehicleDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertVehicles(vehicles: List<VehicleEntity>)
+
+    @Query(value = "DELETE FROM vehicles WHERE id = :vehicleId")
+    suspend fun deleteVehicleById(vehicleId: Long)
 }
