@@ -69,7 +69,11 @@ import java.io.FileOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GarageBottomSheet(isOpen: Boolean, vehicleForEdit: VehicleUi?, onSubmitIntent: (GarageIntent) -> Unit) {
+fun GarageBottomSheet(
+    isOpen: Boolean,
+    vehicleForEdit: VehicleUi?,
+    onSubmitIntent: (GarageIntent) -> Unit
+) {
     AddEditBottomSheet(
         isVisible = isOpen,
         onDismissRequest = { onSubmitIntent(GarageIntent.HideSheet) }
@@ -286,7 +290,7 @@ private fun VehicleForm(vehicleForEdit: VehicleUi?, onSubmitIntent: (GarageInten
             shape = RoundedCornerShape(size = 12.dp),
             enabled = isFormValid && vehicleForEdit == null,
 
-        ) {
+            ) {
             Text(text = "Add another vehicle")
         }
 
@@ -348,7 +352,9 @@ private fun FuelTypeDropdown(
             label = { Text(text = "Fuel Type") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-            modifier = Modifier.menuAnchor().fillMaxWidth()
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
         )
 
         ExposedDropdownMenu(
@@ -357,7 +363,10 @@ private fun FuelTypeDropdown(
         ) {
             FuelType.entries.forEach { type ->
                 DropdownMenuItem(
-                    text = { Text(text = type.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                    text = {
+                        Text(
+                            text = type.name.lowercase().replaceFirstChar { it.uppercase() })
+                    },
                     onClick = {
                         onTypeSelected(type)
                         expanded = false

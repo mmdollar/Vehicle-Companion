@@ -152,7 +152,7 @@ private fun AddVehicleContent(onSubmitIntent: (GarageIntent) -> Unit) {
 
 @Composable
 private fun ErrorView() {
-    Text("Error Z")
+    Text(text = "Oh, something went bad.")
 }
 
 @Composable

@@ -3,6 +3,7 @@ package com.example.vehiclecompanion.database.di
 import android.content.Context
 import androidx.room.Room
 import com.example.vehiclecompanion.database.VehicleCompanionDatabase
+import com.example.vehiclecompanion.database.dao.FavoritesDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,4 +29,8 @@ object DatabaseModule {
     @Singleton
     @Provides
     fun provideVehicleDao(database: VehicleCompanionDatabase) = database.getVehicleDao()
+
+    @Provides
+    fun provideFavoritesDao(database: VehicleCompanionDatabase): FavoritesDao =
+        database.getFavoritesDao()
 }
