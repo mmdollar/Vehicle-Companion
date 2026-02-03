@@ -1,10 +1,11 @@
 package com.example.vehiclecompanion.garage.data
 
-data class VehicleEntity(
+data class VehicleUi(
     val name: String,
     val make: String,
     val model: String,
-    val year: String,
-    val vin: Int,
+    val year: Int,
+    val vin: String,
+    val photo: String,
     val fuelType: FuelType = FuelType.UNKNOWN
 )

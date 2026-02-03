@@ -9,11 +9,13 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.ui.NavDisplay
 import com.example.vehiclecompanion.garage.ui.GarageScreen
+import com.example.vehiclecompanion.garage.ui.GarageViewModel
 
 @Composable
 fun BottomNavigationBar(backStack: NavBackStack<NavKey>) {
@@ -24,8 +26,8 @@ fun BottomNavigationBar(backStack: NavBackStack<NavKey>) {
                 backStack.clear()
                 backStack.add(Screen.Garage)
             },
-            icon = { Icon(Icons.Default.Garage, null) },
-            label = { Text("Garage") }
+            icon = { Icon(imageVector = Icons.Default.Garage, contentDescription = null) },
+            label = { Text(text = "Garage") }
         )
         NavigationBarItem(
             selected = backStack.last() is Screen.Garage,
@@ -33,8 +35,8 @@ fun BottomNavigationBar(backStack: NavBackStack<NavKey>) {
                 backStack.clear()
                 backStack.add(Screen.Garage)
             },
-            icon = { Icon(Icons.Default.Place, null) },
-            label = { Text("Places") }
+            icon = { Icon(imageVector = Icons.Default.Place, contentDescription = null) },
+            label = { Text(text = "Places") }
         )
         NavigationBarItem(
             selected = backStack.last() is Screen.Garage,
@@ -42,8 +44,8 @@ fun BottomNavigationBar(backStack: NavBackStack<NavKey>) {
                 backStack.clear()
                 backStack.add(Screen.Garage)
             },
-            icon = { Icon(Icons.Default.Favorite, null) },
-            label = { Text("Favorites") }
+            icon = { Icon(imageVector = Icons.Default.Favorite, contentDescription = null) },
+            label = { Text(text = "Favorites") }
         )
     }
 }
@@ -55,8 +57,13 @@ fun NavigationDisplay(backStack: NavBackStack<NavKey>) {
         onBack = { backStack.removeLastOrNull() },
         entryProvider = { screen ->
             when (screen) {
-                Screen.Garage -> NavEntry(key = screen) { GarageScreen() }
-                else -> NavEntry(screen) { GarageScreen() }
+                Screen.Garage -> NavEntry(key = screen) {
+                    val viewModel: GarageViewModel = hiltViewModel()
+                    GarageScreen(viewModel = viewModel)
+                }
+                else -> NavEntry(key = screen) {
+                    val viewModel: GarageViewModel = hiltViewModel()
+                    GarageScreen(viewModel) }
             }
         }
     )

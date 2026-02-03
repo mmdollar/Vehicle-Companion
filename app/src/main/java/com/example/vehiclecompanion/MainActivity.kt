@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
                     bottomBar = { BottomNavigationBar(backStack = backStack) }
                 ) { innerPadding ->
                     Box(modifier = Modifier.padding(paddingValues = innerPadding)) {
-                        NavigationDisplay(backStack)
+                        NavigationDisplay(backStack = backStack)
                     }
                 }
             }

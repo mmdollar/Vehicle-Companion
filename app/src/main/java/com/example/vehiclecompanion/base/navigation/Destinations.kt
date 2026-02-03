@@ -6,4 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed class Screen: NavKey {
     @Serializable data object Garage : Screen()
+    @Serializable data object GeneralError: Screen()
 }
