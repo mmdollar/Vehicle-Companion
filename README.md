@@ -18,7 +18,6 @@ A modern Android application for managing vehicle information, built with Jetpac
 
 ### Architecture
 - **MVI (Model-View-Intent)**: Unidirectional data flow pattern for predictable state management
-- **Clean Architecture**: Separation of concerns with distinct layers (UI, Domain, Data)
 - **Jetpack Compose**: Modern declarative UI framework
 - **Hilt**: Dependency injection for better testability and modularity
 - **Room**: Local database for offline-first data persistence
@@ -26,9 +25,7 @@ A modern Android application for managing vehicle information, built with Jetpac
 - **Navigation Component 3**: Type-safe navigation between screens
 
 ### Design
-- **Minimal Design**: Clean, card-based UI focusing on content and usability
 - **Material 3**: Following Google's latest design guidelines
-- **Responsive Layouts**: Adapting to different screen sizes
 
 ## How to Run Tests
 
