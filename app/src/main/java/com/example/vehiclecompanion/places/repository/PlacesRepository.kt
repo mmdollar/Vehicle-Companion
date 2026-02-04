@@ -28,7 +28,6 @@ class PlacesRepository @Inject constructor(
 
     }.flowOn(context = Dispatchers.IO)
 
-
     fun getFavorites(): Flow<List<FavoritePlaceEntity>> = favoritesDao.getAll()
 
     suspend fun toggleFavorite(place: PlaceUi, isFavorite: Boolean) {

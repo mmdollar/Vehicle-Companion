@@ -34,9 +34,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,13 +44,13 @@ import coil.compose.AsyncImage
 import com.example.vehiclecompanion.base.ui.data.UiState
 import com.example.vehiclecompanion.base.ui.generalerror.GeneralError
 import com.example.vehiclecompanion.places.data.PlaceUi
+import com.example.vehiclecompanion.places.data.PlacesIntent
 import com.example.vehiclecompanion.places.data.PlacesUi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlacesScreen(viewModel: PlacesViewModel) {
     val uiState: UiState<PlacesUi> by viewModel.uiState.collectAsState()
-    var selectedPlace by remember { mutableStateOf<PlaceUi?>(value = null) }
 
     when (val state = uiState) {
         is UiState.Loading -> {
@@ -70,42 +67,66 @@ fun PlacesScreen(viewModel: PlacesViewModel) {
                         place = place,
                         isFavorite = state.data.favoriteIds.contains(place.id),
                         onFavoriteClick = { isFavorite ->
-                            viewModel.toggleFavorite(place = place, isFavorite = isFavorite)
+                            viewModel.onSubmitIntent(
+                                intent = PlacesIntent.ToggleFavorite(
+                                    place = place,
+                                    isFavorite = isFavorite
+                                )
+                            )
                         },
                         onClick = {
-                            selectedPlace = place
+                            viewModel.onSubmitIntent(intent = PlacesIntent.SelectPlace(place = place))
                         }
                     )
                 }
             }
 
-            selectedPlace?.let { place ->
-                val sheetState = rememberModalBottomSheetState(
-                    skipPartiallyExpanded = false
-                )
+            DetailsScreen(
+                isOpen = state.data.isSheetOpen,
+                place = state.data.selectedPlace,
+                isFavorite = state.data.favoriteIds.contains(state.data.selectedPlace?.id),
+                onSubmitIntent = { intent -> viewModel.onSubmitIntent(intent) }
+            )
+        }
+    }
+}
 
-                ModalBottomSheet(
-                    onDismissRequest = { selectedPlace = null },
-                    sheetState = sheetState
-                ) {
-                    val isFavorite = state.data.favoriteIds.contains(place.id)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DetailsScreen(
+    isOpen: Boolean,
+    place: PlaceUi?,
+    isFavorite: Boolean,
+    onSubmitIntent: (PlacesIntent) -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = false
+    )
 
-                    PlaceDetailBottomSheet(
-                        place = place,
-                        isFavorite = isFavorite,
-                        onFavoriteClick = {
-                            viewModel.toggleFavorite(place = place, isFavorite = isFavorite.not())
-                        }
+    if (isOpen && place != null) {
+        ModalBottomSheet(
+            onDismissRequest = { onSubmitIntent(PlacesIntent.CloseSheet) },
+            sheetState = sheetState
+        ) {
+            PlaceDetailBottomSheet(
+                place = place,
+                isFavorite = isFavorite,
+                onFavoriteClick = {
+                    onSubmitIntent(
+                        PlacesIntent.ToggleFavorite(
+                            place = place,
+                            isFavorite = isFavorite.not()
+                        )
                     )
                 }
-            }
+            )
         }
     }
 }
 
 
 @Composable
-fun PlaceCard(
+private fun PlaceCard(
     place: PlaceUi,
     isFavorite: Boolean,
     onFavoriteClick: (Boolean) -> Unit,
@@ -177,7 +198,7 @@ fun PlaceCard(
 }
 
 @Composable
-fun PlaceImage(
+private fun PlaceImage(
     imageUrl: String?,
     modifier: Modifier = Modifier
 ) {

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.vehiclecompanion.base.ui.data.UiState
 import com.example.vehiclecompanion.places.data.PlaceUi
+import com.example.vehiclecompanion.places.data.PlacesIntent
 import com.example.vehiclecompanion.places.data.PlacesUi
 import com.example.vehiclecompanion.places.repository.PlacesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,6 +31,21 @@ class PlacesViewModel @Inject constructor(
         observePlacesAndFavorites()
     }
 
+    fun onSubmitIntent(intent: PlacesIntent): Unit =
+        when (intent) {
+            is PlacesIntent.ToggleFavorite -> {
+                toggleFavorite(place = intent.place, isFavorite = intent.isFavorite)
+            }
+
+            is PlacesIntent.SelectPlace -> {
+                updateUi { copy(selectedPlace = intent.place, isSheetOpen = true) }
+            }
+
+            PlacesIntent.CloseSheet -> {
+                updateUi { copy(selectedPlace = null, isSheetOpen = false) }
+            }
+        }
+
     private fun observePlacesAndFavorites() {
         combine(
             flow = repository.getPlaces(),
@@ -50,10 +66,16 @@ class PlacesViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    fun toggleFavorite(place: PlaceUi, isFavorite: Boolean) {
+    private fun toggleFavorite(place: PlaceUi, isFavorite: Boolean) {
         viewModelScope.launch {
             repository.toggleFavorite(place, isFavorite)
         }
     }
 
+    private inline fun updateUi(transform: PlacesUi.() -> PlacesUi) {
+        val currentState = _uiState.value
+        if (currentState is UiState.Success) {
+            _uiState.value = UiState.Success(data = currentState.data.transform())
+        }
+    }
 }

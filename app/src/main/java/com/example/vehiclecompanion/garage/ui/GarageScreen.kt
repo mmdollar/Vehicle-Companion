@@ -40,12 +40,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.vehiclecompanion.base.ui.data.UiState
+import com.example.vehiclecompanion.base.ui.generalerror.GeneralError
 import com.example.vehiclecompanion.base.ui.theme.VehicleCompanionTheme
 import com.example.vehiclecompanion.garage.data.FuelType
 import com.example.vehiclecompanion.garage.data.GarageIntent
 import com.example.vehiclecompanion.garage.data.GarageUi
 import com.example.vehiclecompanion.garage.data.VehicleUi
-import kotlin.text.lowercase
 
 @Composable
 fun GarageScreen(viewModel: GarageViewModel) {
@@ -98,7 +98,7 @@ private fun GarageContent(uiState: UiState<GarageUi>, onSubmitIntent: (GarageInt
 
         when (uiState) {
             is UiState.Loading -> LoadingView()
-            is UiState.Error -> ErrorView()
+            is UiState.Error -> GeneralError()
             is UiState.Success -> {
                 if (uiState.data.vehicles.isEmpty()) {
                     AddVehicleContent(onSubmitIntent = onSubmitIntent)
@@ -148,11 +148,6 @@ private fun AddVehicleContent(onSubmitIntent: (GarageIntent) -> Unit) {
 
         Button(onClick = { onSubmitIntent(GarageIntent.ShowSheet) }) { Text(text = "Add Vehicle") }
     }
-}
-
-@Composable
-private fun ErrorView() {
-    Text(text = "Oh, something went bad.")
 }
 
 @Composable

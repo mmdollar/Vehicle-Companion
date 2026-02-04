@@ -30,7 +30,7 @@ class GarageViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            delay(timeMillis = 1000L)
+            delay(timeMillis = ONE_SECOND)
             getAllVehicles()
         }
     }
@@ -90,5 +90,9 @@ class GarageViewModel @Inject constructor(
                     _uiState.value = newState
                 }
         }
+    }
+
+    private companion object {
+        const val ONE_SECOND = 1000L
     }
 }

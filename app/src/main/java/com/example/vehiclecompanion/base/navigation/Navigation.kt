@@ -1,7 +1,6 @@
 package com.example.vehiclecompanion.base.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Garage
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Icon
@@ -29,7 +28,7 @@ fun BottomNavigationBar(backStack: NavBackStack<NavKey>) {
                 backStack.clear()
                 backStack.add(Screen.Garage)
             },
-            icon = { Icon(imageVector = Icons.Default.Garage, contentDescription = null) },
+            icon = { Icon(imageVector = Icons.Default.Garage, contentDescription = "Garage") },
             label = { Text(text = "Garage") }
         )
         NavigationBarItem(
@@ -38,17 +37,8 @@ fun BottomNavigationBar(backStack: NavBackStack<NavKey>) {
                 backStack.clear()
                 backStack.add(Screen.Places)
             },
-            icon = { Icon(imageVector = Icons.Default.Place, contentDescription = null) },
+            icon = { Icon(imageVector = Icons.Default.Place, contentDescription = "Places") },
             label = { Text(text = "Places") }
-        )
-        NavigationBarItem(
-            selected = backStack.last() is Screen.Garage,
-            onClick = {
-                backStack.clear()
-                backStack.add(Screen.Garage)
-            },
-            icon = { Icon(imageVector = Icons.Default.Favorite, contentDescription = null) },
-            label = { Text(text = "Favorites") }
         )
     }
 }
