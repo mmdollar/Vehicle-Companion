@@ -19,6 +19,7 @@ mockito = "5.21.0"
 mockito-kotlin = "6.2.3"
 materialIconsExtended = "1.7.8"
 coil = "2.7.0"
+kotlinxCoroutinesTest = "1.10.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -51,6 +52,7 @@ mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mo
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockito-kotlin" }
 compose-material-icons = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "materialIconsExtended" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

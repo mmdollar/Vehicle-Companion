@@ -67,6 +67,12 @@ import com.example.vehiclecompanion.garage.data.VehicleUi
 import java.io.File
 import java.io.FileOutputStream
 
+private const val NAME_MAX_LENGTH = 10
+private const val MAKE_MAX_LENGTH = 8
+private const val MODEL_MAX_LENGTH = 10
+private const val YEAR_MAX_LENGTH = 4
+private const val VIN_MAX_LENGTH = 12
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GarageBottomSheet(
@@ -210,7 +216,7 @@ private fun VehicleForm(vehicleForEdit: VehicleUi?, onSubmitIntent: (GarageInten
 
         OutlinedTextField(
             value = name,
-            onValueChange = { name = it },
+            onValueChange = { if (it.length <= NAME_MAX_LENGTH) name = it },
             label = { Text(text = "Vehicle Nickname (e.g. My Daily)") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
@@ -219,14 +225,14 @@ private fun VehicleForm(vehicleForEdit: VehicleUi?, onSubmitIntent: (GarageInten
         Row(horizontalArrangement = spacedBy(space = 8.dp)) {
             OutlinedTextField(
                 value = make,
-                onValueChange = { make = it },
+                onValueChange = { if (it.length <= MAKE_MAX_LENGTH) make = it },
                 label = { Text(text = "Make") },
                 singleLine = true,
                 modifier = Modifier.weight(weight = 1f)
             )
             OutlinedTextField(
                 value = model,
-                onValueChange = { model = it },
+                onValueChange = { if (it.length <= MODEL_MAX_LENGTH) model = it },
                 singleLine = true,
                 label = { Text(text = "Model") },
                 modifier = Modifier.weight(weight = 1f)
@@ -236,7 +242,11 @@ private fun VehicleForm(vehicleForEdit: VehicleUi?, onSubmitIntent: (GarageInten
         Row(horizontalArrangement = spacedBy(space = 8.dp)) {
             OutlinedTextField(
                 value = year,
-                onValueChange = { year = it },
+                onValueChange = { input ->
+                    if (input.all { it.isDigit() } && input.length <= YEAR_MAX_LENGTH) {
+                        year = input
+                    }
+                },
                 label = { Text(text = "Year") },
                 singleLine = true,
                 modifier = Modifier.weight(weight = 1f),
@@ -245,7 +255,7 @@ private fun VehicleForm(vehicleForEdit: VehicleUi?, onSubmitIntent: (GarageInten
             OutlinedTextField(
                 value = vin,
                 singleLine = true,
-                onValueChange = { if (it.length <= 17) vin = it.uppercase() },
+                onValueChange = { if (it.length <= VIN_MAX_LENGTH) vin = it.uppercase() },
                 label = { Text(text = "VIN") },
                 modifier = Modifier.weight(weight = 2f)
             )
