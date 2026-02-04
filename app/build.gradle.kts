@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -6,11 +9,15 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+
 android {
     namespace = "com.example.vehiclecompanion"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.vehiclecompanion"
@@ -27,7 +34,20 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField(
+                type = "String",
+                name = "MAPBOX_TOKEN",
+                value = "\"${localProperties.getProperty("MAPBOX_TOKEN", "")}\""
+            )
+        }
+
         release {
+            buildConfigField(
+                type = "String",
+                name = "MAPBOX_TOKEN",
+                value = "\"${localProperties.getProperty("MAPBOX_TOKEN", "")}\""
+            )
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -43,6 +63,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

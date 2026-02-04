@@ -32,8 +32,8 @@ class PlacesViewModel @Inject constructor(
 
     private fun observePlacesAndFavorites() {
         combine(
-            repository.getPlaces(),
-            repository.getFavorites()
+            flow = repository.getPlaces(),
+            flow2 = repository.getFavorites()
         ) { places, favorites ->
             PlacesUi(
                 places = places,
